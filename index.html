@@ -1,44 +1,147 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Mi primera web</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #111;
-            color: #f5f5f5;
-            text-align: center;
-            padding: 50px;
-        }
-        h1 {
-            color: #00ffcc;
-        }
-        button {
-            background: #00ffcc;
-            border: none;
-            padding: 15px 25px;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 8px;
-        }
-        button:hover {
-            background: #00ccaa;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Mini gestor personal</title>
+
+<style>
+body {
+    font-family: system-ui, sans-serif;
+    background: #0f172a;
+    color: #e5e7eb;
+    display: flex;
+    justify-content: center;
+    padding: 40px;
+}
+
+.app {
+    background: #020617;
+    padding: 20px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 500px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+input, textarea, button {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    font-size: 14px;
+}
+
+input, textarea {
+    background: #0f172a;
+    color: white;
+}
+
+button {
+    background: #22c55e;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #16a34a;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    background: #0f172a;
+    padding: 10px;
+    margin-bottom: 6px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+li span {
+    flex: 1;
+}
+
+.delete {
+    background: #ef4444;
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+</style>
 </head>
+
 <body>
 
-    <h1>Hola 👋</h1>
-    <p>Esta es mi primera web y funciona 🚀</p>
+<div class="app">
+    <h1>🧠 Gestor personal</h1>
 
-    <button onclick="saludar()">Haz clic</button>
+    <input id="taskInput" placeholder="Nueva tarea...">
+    <button onclick="addTask()">Añadir tarea</button>
 
-    <script>
-        function saludar() {
-            alert("🔥 Funciona el botón 🔥");
-        }
-    </script>
+    <ul id="taskList"></ul>
+
+    <h3>📝 Notas</h3>
+    <textarea id="notes" rows="6" placeholder="Escribe lo que quieras..."></textarea>
+</div>
+
+<script>
+const taskInput = document.getElementById("taskInput");
+const taskList = document.getElementById("taskList");
+const notes = document.getElementById("notes");
+
+// cargar datos
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+notes.value = localStorage.getItem("notes") || "";
+
+function saveTasks() {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
+function renderTasks() {
+    taskList.innerHTML = "";
+    tasks.forEach((task, index) => {
+        const li = document.createElement("li");
+        const span = document.createElement("span");
+        span.textContent = task;
+
+        const del = document.createElement("button");
+        del.textContent = "X";
+        del.className = "delete";
+        del.onclick = () => {
+            tasks.splice(index, 1);
+            saveTasks();
+            renderTasks();
+        };
+
+        li.appendChild(span);
+        li.appendChild(del);
+        taskList.appendChild(li);
+    });
+}
+
+function addTask() {
+    if (taskInput.value.trim() === "") return;
+    tasks.push(taskInput.value);
+    taskInput.value = "";
+    saveTasks();
+    renderTasks();
+}
+
+notes.addEventListener("input", () => {
+    localStorage.setItem("notes", notes.value);
+});
+
+renderTasks();
+</script>
 
 </body>
 </html>
