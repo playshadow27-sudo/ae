@@ -2,24 +2,26 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>LifeOS</title>
+<title>LifeOS Definitivo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#22c55e">
 
 <style>
 :root{
 --bg:#020617;
---card:#020617;
 --panel:#0f172a;
+--card:#020617;
 --text:#e5e7eb;
 --accent:#22c55e;
 --danger:#ef4444;
 --warn:#facc15;
+--muted:#64748b;
 }
 
 .light{
 --bg:#f1f5f9;
 --panel:#ffffff;
+--card:#e5e7eb;
 --text:#020617;
 }
 
@@ -32,30 +34,31 @@ background:var(--bg);
 color:var(--text);
 display:flex;
 justify-content:center;
-padding:20px;
+padding:15px;
 }
 
 .app{
 width:100%;
-max-width:900px;
+max-width:1100px;
+display:grid;
+grid-template-columns:2fr 1fr;
+gap:15px;
+}
+
+.panel{
 background:var(--panel);
 border-radius:16px;
-padding:20px;
+padding:15px;
+overflow:auto;
+max-height:90vh;
 }
 
-header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-gap:10px;
-}
-
-h1{margin:0;font-size:24px}
+h1,h2,h3{margin:5px 0}
 
 button{
 border:none;
 border-radius:10px;
-padding:8px 12px;
+padding:6px 10px;
 cursor:pointer;
 background:var(--accent);
 }
@@ -65,83 +68,70 @@ button.danger{background:var(--danger);color:white}
 
 input,select,textarea{
 width:100%;
-padding:10px;
-margin:5px 0;
+padding:8px;
+margin:4px 0;
 border-radius:10px;
 border:none;
 background:var(--bg);
 color:var(--text);
 }
 
-.grid{
-display:grid;
-grid-template-columns:1fr 1fr 1fr;
-gap:8px;
-}
-
-.filters{
-display:flex;
-gap:6px;
-margin:10px 0;
-flex-wrap:wrap;
-}
+small{color:var(--muted)}
 
 ul{list-style:none;padding:0;margin:0}
 
-li{
+.task{
 background:var(--bg);
-padding:10px;
-margin-bottom:6px;
+padding:8px;
 border-radius:10px;
+margin-bottom:6px;
 display:flex;
-gap:8px;
 align-items:center;
+gap:6px;
 cursor:grab;
 }
 
-li.done span{text-decoration:line-through;opacity:.6}
-li.high{border-left:4px solid var(--danger)}
-li.medium{border-left:4px solid var(--warn)}
+.task.done span{text-decoration:line-through;opacity:.6}
+.task.high{border-left:4px solid var(--danger)}
+.task.medium{border-left:4px solid var(--warn)}
 
-li span{flex:1}
+.task span{flex:1}
 
-small{opacity:.7}
-
-.stats{
-display:flex;
-gap:10px;
-margin:10px 0;
-flex-wrap:wrap;
+.calendar{
+display:grid;
+grid-template-columns:repeat(7,1fr);
+gap:4px;
+margin-top:10px;
 }
 
-.card{
+.day{
 background:var(--bg);
-padding:10px;
-border-radius:10px;
+padding:6px;
+border-radius:8px;
+min-height:60px;
+font-size:12px;
 }
 
-footer{
-margin-top:15px;
-display:flex;
-gap:6px;
-flex-wrap:wrap;
+.today{outline:2px solid var(--accent)}
+
+.timer{
+font-size:32px;
+text-align:center;
+margin:10px 0;
 }
 </style>
 </head>
 
 <body>
 <div class="app">
-<header>
-<h1>🧠 LifeOS</h1>
-<div>
-<button class="alt" onclick="toggleTheme()">🌓</button>
-<button class="alt" onclick="requestNotif()">🔔</button>
-</div>
-</header>
 
-<input id="search" placeholder="Buscar tareas...">
+<!-- LEFT PANEL -->
+<div class="panel">
+<h1>🧠 LifeOS Definitivo</h1>
 
-<div class="grid">
+<input id="search" placeholder="Buscar tareas…">
+
+<div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:5px">
 <input id="taskText" placeholder="Nueva tarea">
 <input type="date" id="taskDate">
 <select id="taskPriority">
@@ -153,74 +143,81 @@ flex-wrap:wrap;
 
 <button onclick="addTask()">Añadir tarea</button>
 
-<div class="filters">
+<div>
 <button class="alt" onclick="setFilter('all')">Todas</button>
 <button class="alt" onclick="setFilter('todo')">Pendientes</button>
 <button class="alt" onclick="setFilter('done')">Hechas</button>
+<button class="alt" onclick="setFilter('today')">Hoy</button>
 </div>
 
-<div class="stats">
-<div class="card"><small id="total"></small></div>
-<div class="card"><small id="pending"></small></div>
-<div class="card"><small id="done"></small></div>
+<ul id="taskList"></ul>
 </div>
 
-<ul id="list"></ul>
+<!-- RIGHT PANEL -->
+<div class="panel">
+<h2>📊 Estadísticas</h2>
+<small id="stats"></small>
 
-<h3>📝 Notas rápidas</h3>
-<textarea id="notes" rows="4"></textarea>
+<h2>⏱️ Pomodoro</h2>
+<div class="timer" id="timer">25:00</div>
+<button onclick="startPomodoro()">▶</button>
+<button class="alt" onclick="resetPomodoro()">⟳</button>
 
-<footer>
-<button class="alt" onclick="exportData()">Exportar</button>
-<button class="alt" onclick="importData()">Importar</button>
-<button class="danger" onclick="resetAll()">Reset</button>
-</footer>
+<h2>📅 Calendario</h2>
+<div class="calendar" id="calendar"></div>
+
+<h2>📝 Notas</h2>
+<textarea id="notes" rows="6"></textarea>
+
+<button class="alt" onclick="toggleTheme()">🌓 Tema</button>
+<button class="alt" onclick="exportData()">💾 Backup</button>
+<button class="danger" onclick="resetAll()">🗑 Reset</button>
+</div>
+
 </div>
 
 <script>
+/* =================== DATA =================== */
 let tasks=JSON.parse(localStorage.getItem("tasks"))||[];
 let filter="all";
+let pomodoro=25*60;
+let timerInterval=null;
 
-const list=document.getElementById("list");
+/* =================== ELEMENTS =================== */
+const taskList=document.getElementById("taskList");
 const notes=document.getElementById("notes");
+const stats=document.getElementById("stats");
+const calendar=document.getElementById("calendar");
 notes.value=localStorage.getItem("notes")||"";
 
 document.getElementById("search").oninput=render;
 notes.oninput=()=>localStorage.setItem("notes",notes.value);
 
-function save(){
-localStorage.setItem("tasks",JSON.stringify(tasks));
-}
+/* =================== TASKS =================== */
+function save(){localStorage.setItem("tasks",JSON.stringify(tasks))}
 
 function addTask(){
-const text=taskText.value.trim();
-if(!text)return;
-tasks.push({
-id:Date.now(),
-text,
-date:taskDate.value,
-priority:taskPriority.value,
-done:false
-});
-taskText.value="";
-save();render();
-notify("Nueva tarea añadida");
+if(!taskText.value.trim())return;
+tasks.push({id:Date.now(),text:taskText.value,date:taskDate.value,priority:taskPriority.value,done:false});
+taskText.value="";taskDate.value="";save();render();notify("Nueva tarea añadida");
 }
 
 function render(){
-list.innerHTML="";
-let q=search.value.toLowerCase();
+taskList.innerHTML="";
+let q=document.getElementById("search").value.toLowerCase();
+const todayStr=new Date().toISOString().slice(0,10);
 
 let visible=tasks.filter(t=>{
 if(filter==="done"&&!t.done)return false;
 if(filter==="todo"&&t.done)return false;
+if(filter==="today"&&t.date!==todayStr)return false;
 if(q&&!t.text.toLowerCase().includes(q))return false;
 return true;
 });
 
 visible.forEach(t=>{
 const li=document.createElement("li");
-li.className=`${t.done?"done":""} ${t.priority}`;
+li.className=`task ${t.done?"done":""} ${t.priority}`;
 li.draggable=true;
 
 const chk=document.createElement("input");
@@ -229,70 +226,29 @@ chk.checked=t.done;
 chk.onchange=()=>{t.done=chk.checked;save();render()};
 
 const span=document.createElement("span");
-span.textContent=t.text+" "+(t.date?"📅 "+t.date:"");
+span.textContent=t.text+(t.date?" 📅"+t.date:"");
 span.onclick=()=>{
 const n=prompt("Editar tarea",t.text);
 if(n){t.text=n;save();render()}
 };
 
 const del=document.createElement("button");
-del.textContent="X";
-del.className="danger";
+del.textContent="X";del.className="danger";
 del.onclick=()=>{tasks=tasks.filter(x=>x.id!==t.id);save();render()};
 
-enableDrag(li,t);
 li.append(chk,span,del);
-list.appendChild(li);
+enableDrag(li,t);
+taskList.appendChild(li);
 });
 
-total.textContent="Total: "+tasks.length;
-pending.textContent="Pendientes: "+tasks.filter(t=>!t.done).length;
-done.textContent="Hechas: "+tasks.filter(t=>t.done).length;
+stats.textContent=`Total: ${tasks.length} | Pendientes: ${tasks.filter(t=>!t.done).length} | Hechas: ${tasks.filter(t=>t.done).length}`;
+renderCalendar();
 }
 
+/* =================== FILTER =================== */
 function setFilter(f){filter=f;render()}
 
-function toggleTheme(){
-document.body.classList.toggle("light");
-localStorage.setItem("theme",document.body.classList.contains("light")?"light":"dark");
-}
-
-if(localStorage.getItem("theme")==="light")document.body.classList.add("light");
-
-function exportData(){
-const data={tasks,notes:notes.value};
-const blob=new Blob([JSON.stringify(data)],{type:"application/json"});
-const a=document.createElement("a");
-a.href=URL.createObjectURL(blob);
-a.download="lifeos_backup.json";
-a.click();
-}
-
-function importData(){
-const i=document.createElement("input");
-i.type="file";
-i.accept="application/json";
-i.onchange=e=>{
-const r=new FileReader();
-r.onload=()=>{
-const d=JSON.parse(r.result);
-tasks=d.tasks||[];
-notes.value=d.notes||"";
-save();render();
-};
-r.readAsText(e.target.files[0]);
-};
-i.click();
-}
-
-function resetAll(){
-if(confirm("¿Seguro?")){
-tasks=[];
-notes.value="";
-save();render();
-}
-}
-
+/* =================== DRAG =================== */
 function enableDrag(li,t){
 li.ondragstart=e=>e.dataTransfer.setData("id",t.id);
 li.ondragover=e=>e.preventDefault();
@@ -305,23 +261,54 @@ save();render();
 };
 }
 
-function requestNotif(){
-if("Notification"in window){
-Notification.requestPermission();
+/* =================== CALENDAR =================== */
+function renderCalendar(){
+calendar.innerHTML="";
+const d=new Date();
+const y=d.getFullYear(),m=d.getMonth();
+const first=new Date(y,m,1).getDay();
+const days=new Date(y,m+1,0).getDate();
+
+for(let i=0;i<first;i++)calendar.innerHTML+="<div></div>";
+for(let i=1;i<=days;i++){
+const day=document.createElement("div");
+day.className="day";
+if(i===d.getDate())day.classList.add("today");
+day.innerHTML="<strong>"+i+"</strong>";
+tasks.filter(t=>t.date===`${y}-${String(m+1).padStart(2,"0")}-${String(i).padStart(2,"0")}`)
+.forEach(t=>day.innerHTML+="<div>• "+t.text+"</div>");
+calendar.appendChild(day);
 }
 }
 
-function notify(msg){
-if(Notification.permission==="granted"){
-new Notification(msg);
-}
+/* =================== POMODORO =================== */
+function startPomodoro(){
+if(timerInterval)return;
+timerInterval=setInterval(()=>{
+pomodoro--;
+updateTimer();
+if(pomodoro<=0){clearInterval(timerInterval);timerInterval=null;alert("Pomodoro terminado 🍅");}
+},1000);
 }
 
-document.addEventListener("keydown",e=>{
-if(e.key==="Enter"&&document.activeElement===taskText)addTask();
-});
+function resetPomodoro(){clearInterval(timerInterval);timerInterval=null;pomodoro=25*60;updateTimer();}
+function updateTimer(){const m=Math.floor(pomodoro/60),s=pomodoro%60;document.getElementById("timer").textContent=`${m}:${String(s).padStart(2,"0")}`}
 
-render();
+/* =================== SYSTEM =================== */
+function toggleTheme(){document.body.classList.toggle("light");localStorage.setItem("theme",document.body.classList.contains("light")?"light":"dark")}
+if(localStorage.getItem("theme")==="light")document.body.classList.add("light");
+
+function exportData(){const data={tasks,notes:notes.value};const blob=new Blob([JSON.stringify(data)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="lifeos_definitivo_backup.json";a.click();}
+function resetAll(){if(confirm("¿Seguro?")){tasks=[];notes.value="";save();render();}}
+
+/* =================== NOTIFICATIONS =================== */
+function notify(msg){if("Notification"in window&&Notification.permission==="granted")new Notification(msg)}
+if("Notification"in window)Notification.requestPermission();
+
+/* =================== HOTKEY =================== */
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&document.activeElement===taskText)addTask();})
+
+render();updateTimer();
 </script>
 </body>
 </html>
