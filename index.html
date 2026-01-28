@@ -2,123 +2,129 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Gestor Personal Pro</title>
+<title>LifeOS</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#22c55e">
 
 <style>
-:root {
-    --bg: #0f172a;
-    --card: #020617;
-    --text: #e5e7eb;
-    --accent: #22c55e;
-    --danger: #ef4444;
+:root{
+--bg:#020617;
+--card:#020617;
+--panel:#0f172a;
+--text:#e5e7eb;
+--accent:#22c55e;
+--danger:#ef4444;
+--warn:#facc15;
 }
 
-.light {
-    --bg: #f1f5f9;
-    --card: #ffffff;
-    --text: #020617;
+.light{
+--bg:#f1f5f9;
+--panel:#ffffff;
+--text:#020617;
 }
 
-* {
-    box-sizing: border-box;
+*{box-sizing:border-box}
+
+body{
+margin:0;
+font-family:system-ui;
+background:var(--bg);
+color:var(--text);
+display:flex;
+justify-content:center;
+padding:20px;
 }
 
-body {
-    margin: 0;
-    font-family: system-ui, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    display: flex;
-    justify-content: center;
-    padding: 20px;
+.app{
+width:100%;
+max-width:900px;
+background:var(--panel);
+border-radius:16px;
+padding:20px;
 }
 
-.app {
-    width: 100%;
-    max-width: 600px;
-    background: var(--card);
-    border-radius: 14px;
-    padding: 20px;
+header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px;
 }
 
-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+h1{margin:0;font-size:24px}
+
+button{
+border:none;
+border-radius:10px;
+padding:8px 12px;
+cursor:pointer;
+background:var(--accent);
 }
 
-h1 {
-    font-size: 22px;
+button.alt{background:#334155;color:white}
+button.danger{background:var(--danger);color:white}
+
+input,select,textarea{
+width:100%;
+padding:10px;
+margin:5px 0;
+border-radius:10px;
+border:none;
+background:var(--bg);
+color:var(--text);
 }
 
-button {
-    border: none;
-    border-radius: 8px;
-    padding: 8px 12px;
-    cursor: pointer;
-    background: var(--accent);
-    color: black;
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr 1fr;
+gap:8px;
 }
 
-button.secondary {
-    background: #334155;
-    color: white;
+.filters{
+display:flex;
+gap:6px;
+margin:10px 0;
+flex-wrap:wrap;
 }
 
-button.danger {
-    background: var(--danger);
-    color: white;
+ul{list-style:none;padding:0;margin:0}
+
+li{
+background:var(--bg);
+padding:10px;
+margin-bottom:6px;
+border-radius:10px;
+display:flex;
+gap:8px;
+align-items:center;
+cursor:grab;
 }
 
-input, textarea {
-    width: 100%;
-    margin: 8px 0;
-    padding: 10px;
-    border-radius: 8px;
-    border: none;
-    background: var(--bg);
-    color: var(--text);
+li.done span{text-decoration:line-through;opacity:.6}
+li.high{border-left:4px solid var(--danger)}
+li.medium{border-left:4px solid var(--warn)}
+
+li span{flex:1}
+
+small{opacity:.7}
+
+.stats{
+display:flex;
+gap:10px;
+margin:10px 0;
+flex-wrap:wrap;
 }
 
-.filters {
-    display: flex;
-    gap: 6px;
-    margin: 10px 0;
+.card{
+background:var(--bg);
+padding:10px;
+border-radius:10px;
 }
 
-ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-li {
-    background: var(--bg);
-    margin-bottom: 6px;
-    padding: 8px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: grab;
-}
-
-li.done span {
-    text-decoration: line-through;
-    opacity: 0.6;
-}
-
-li span {
-    flex: 1;
-}
-
-small {
-    opacity: 0.7;
-}
-
-footer {
-    margin-top: 15px;
+footer{
+margin-top:15px;
+display:flex;
+gap:6px;
+flex-wrap:wrap;
 }
 </style>
 </head>
@@ -126,180 +132,194 @@ footer {
 <body>
 <div class="app">
 <header>
-    <h1>🧠 Gestor Personal</h1>
-    <button onclick="toggleTheme()">🌓</button>
+<h1>🧠 LifeOS</h1>
+<div>
+<button class="alt" onclick="toggleTheme()">🌓</button>
+<button class="alt" onclick="requestNotif()">🔔</button>
+</div>
 </header>
 
-<input id="taskInput" placeholder="Nueva tarea..." />
-<button onclick="addTask()">Añadir</button>
+<input id="search" placeholder="Buscar tareas...">
 
-<div class="filters">
-    <button class="secondary" onclick="setFilter('all')">Todas</button>
-    <button class="secondary" onclick="setFilter('todo')">Pendientes</button>
-    <button class="secondary" onclick="setFilter('done')">Hechas</button>
+<div class="grid">
+<input id="taskText" placeholder="Nueva tarea">
+<input type="date" id="taskDate">
+<select id="taskPriority">
+<option value="low">Baja</option>
+<option value="medium">Media</option>
+<option value="high">Alta</option>
+</select>
 </div>
 
-<small id="counter"></small>
+<button onclick="addTask()">Añadir tarea</button>
 
-<ul id="taskList"></ul>
+<div class="filters">
+<button class="alt" onclick="setFilter('all')">Todas</button>
+<button class="alt" onclick="setFilter('todo')">Pendientes</button>
+<button class="alt" onclick="setFilter('done')">Hechas</button>
+</div>
 
-<h3>📝 Notas</h3>
-<textarea id="notes" rows="5" placeholder="Notas rápidas..."></textarea>
+<div class="stats">
+<div class="card"><small id="total"></small></div>
+<div class="card"><small id="pending"></small></div>
+<div class="card"><small id="done"></small></div>
+</div>
+
+<ul id="list"></ul>
+
+<h3>📝 Notas rápidas</h3>
+<textarea id="notes" rows="4"></textarea>
 
 <footer>
-    <button class="secondary" onclick="exportData()">Exportar</button>
-    <button class="secondary" onclick="importData()">Importar</button>
-    <button class="danger" onclick="resetAll()">Reset</button>
+<button class="alt" onclick="exportData()">Exportar</button>
+<button class="alt" onclick="importData()">Importar</button>
+<button class="danger" onclick="resetAll()">Reset</button>
 </footer>
 </div>
 
 <script>
-let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-let notes = localStorage.getItem("notes") || "";
-let filter = "all";
+let tasks=JSON.parse(localStorage.getItem("tasks"))||[];
+let filter="all";
 
-const taskInput = document.getElementById("taskInput");
-const taskList = document.getElementById("taskList");
-const notesEl = document.getElementById("notes");
-const counter = document.getElementById("counter");
+const list=document.getElementById("list");
+const notes=document.getElementById("notes");
+notes.value=localStorage.getItem("notes")||"";
 
-notesEl.value = notes;
+document.getElementById("search").oninput=render;
+notes.oninput=()=>localStorage.setItem("notes",notes.value);
 
-// ---------- Persistencia ----------
-function save() {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-    localStorage.setItem("notes", notesEl.value);
+function save(){
+localStorage.setItem("tasks",JSON.stringify(tasks));
 }
 
-// ---------- Render ----------
-function render() {
-    taskList.innerHTML = "";
-
-    let visible = tasks.filter(t =>
-        filter === "all" ||
-        (filter === "done" && t.done) ||
-        (filter === "todo" && !t.done)
-    );
-
-    visible.forEach((task, index) => {
-        const li = document.createElement("li");
-        li.draggable = true;
-        li.className = task.done ? "done" : "";
-
-        const check = document.createElement("input");
-        check.type = "checkbox";
-        check.checked = task.done;
-        check.onchange = () => {
-            task.done = check.checked;
-            save(); render();
-        };
-
-        const span = document.createElement("span");
-        span.textContent = task.text;
-        span.onclick = () => editTask(task);
-
-        const del = document.createElement("button");
-        del.textContent = "X";
-        del.className = "danger";
-        del.onclick = () => {
-            tasks.splice(tasks.indexOf(task), 1);
-            save(); render();
-        };
-
-        li.append(check, span, del);
-        enableDrag(li, task);
-        taskList.appendChild(li);
-    });
-
-    counter.textContent =
-        `Total: ${tasks.length} | Pendientes: ${tasks.filter(t => !t.done).length}`;
+function addTask(){
+const text=taskText.value.trim();
+if(!text)return;
+tasks.push({
+id:Date.now(),
+text,
+date:taskDate.value,
+priority:taskPriority.value,
+done:false
+});
+taskText.value="";
+save();render();
+notify("Nueva tarea añadida");
 }
 
-// ---------- Funciones ----------
-function addTask() {
-    if (!taskInput.value.trim()) return;
-    tasks.push({ text: taskInput.value, done: false });
-    taskInput.value = "";
-    save(); render();
+function render(){
+list.innerHTML="";
+let q=search.value.toLowerCase();
+
+let visible=tasks.filter(t=>{
+if(filter==="done"&&!t.done)return false;
+if(filter==="todo"&&t.done)return false;
+if(q&&!t.text.toLowerCase().includes(q))return false;
+return true;
+});
+
+visible.forEach(t=>{
+const li=document.createElement("li");
+li.className=`${t.done?"done":""} ${t.priority}`;
+li.draggable=true;
+
+const chk=document.createElement("input");
+chk.type="checkbox";
+chk.checked=t.done;
+chk.onchange=()=>{t.done=chk.checked;save();render()};
+
+const span=document.createElement("span");
+span.textContent=t.text+" "+(t.date?"📅 "+t.date:"");
+span.onclick=()=>{
+const n=prompt("Editar tarea",t.text);
+if(n){t.text=n;save();render()}
+};
+
+const del=document.createElement("button");
+del.textContent="X";
+del.className="danger";
+del.onclick=()=>{tasks=tasks.filter(x=>x.id!==t.id);save();render()};
+
+enableDrag(li,t);
+li.append(chk,span,del);
+list.appendChild(li);
+});
+
+total.textContent="Total: "+tasks.length;
+pending.textContent="Pendientes: "+tasks.filter(t=>!t.done).length;
+done.textContent="Hechas: "+tasks.filter(t=>t.done).length;
 }
 
-function editTask(task) {
-    const text = prompt("Editar tarea", task.text);
-    if (text !== null) {
-        task.text = text;
-        save(); render();
-    }
+function setFilter(f){filter=f;render()}
+
+function toggleTheme(){
+document.body.classList.toggle("light");
+localStorage.setItem("theme",document.body.classList.contains("light")?"light":"dark");
 }
 
-function setFilter(f) {
-    filter = f;
-    render();
+if(localStorage.getItem("theme")==="light")document.body.classList.add("light");
+
+function exportData(){
+const data={tasks,notes:notes.value};
+const blob=new Blob([JSON.stringify(data)],{type:"application/json"});
+const a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="lifeos_backup.json";
+a.click();
 }
 
-notesEl.addEventListener("input", save);
-
-// ---------- Tema ----------
-function toggleTheme() {
-    document.body.classList.toggle("light");
-    localStorage.setItem("theme",
-        document.body.classList.contains("light") ? "light" : "dark");
+function importData(){
+const i=document.createElement("input");
+i.type="file";
+i.accept="application/json";
+i.onchange=e=>{
+const r=new FileReader();
+r.onload=()=>{
+const d=JSON.parse(r.result);
+tasks=d.tasks||[];
+notes.value=d.notes||"";
+save();render();
+};
+r.readAsText(e.target.files[0]);
+};
+i.click();
 }
 
-if (localStorage.getItem("theme") === "light") {
-    document.body.classList.add("light");
+function resetAll(){
+if(confirm("¿Seguro?")){
+tasks=[];
+notes.value="";
+save();render();
+}
 }
 
-// ---------- Export / Import ----------
-function exportData() {
-    const data = JSON.stringify({ tasks, notes: notesEl.value });
-    const blob = new Blob([data], { type: "application/json" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "gestor_backup.json";
-    a.click();
+function enableDrag(li,t){
+li.ondragstart=e=>e.dataTransfer.setData("id",t.id);
+li.ondragover=e=>e.preventDefault();
+li.ondrop=e=>{
+e.preventDefault();
+const from=tasks.findIndex(x=>x.id==e.dataTransfer.getData("id"));
+const to=tasks.indexOf(t);
+tasks.splice(to,0,tasks.splice(from,1)[0]);
+save();render();
+};
 }
 
-function importData() {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "application/json";
-    input.onchange = e => {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.onload = () => {
-            const data = JSON.parse(reader.result);
-            tasks = data.tasks || [];
-            notesEl.value = data.notes || "";
-            save(); render();
-        };
-        reader.readAsText(file);
-    };
-    input.click();
+function requestNotif(){
+if("Notification"in window){
+Notification.requestPermission();
+}
 }
 
-function resetAll() {
-    if (!confirm("¿Seguro?")) return;
-    tasks = [];
-    notesEl.value = "";
-    save(); render();
+function notify(msg){
+if(Notification.permission==="granted"){
+new Notification(msg);
+}
 }
 
-// ---------- Drag & Drop ----------
-function enableDrag(li, task) {
-    li.addEventListener("dragstart", e => {
-        e.dataTransfer.setData("text/plain", tasks.indexOf(task));
-    });
-
-    li.addEventListener("dragover", e => e.preventDefault());
-
-    li.addEventListener("drop", e => {
-        e.preventDefault();
-        const from = e.dataTransfer.getData("text/plain");
-        const to = tasks.indexOf(task);
-        tasks.splice(to, 0, tasks.splice(from, 1)[0]);
-        save(); render();
-    });
-}
+document.addEventListener("keydown",e=>{
+if(e.key==="Enter"&&document.activeElement===taskText)addTask();
+});
 
 render();
 </script>
