@@ -2,178 +2,76 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>LifeOS Definitivo</title>
+<title>LifeOS Definitivo 2.0</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#22c55e">
 
 <style>
 :root{
---bg:#020617;
---panel:#0f172a;
---card:#020617;
---text:#e5e7eb;
---accent:#22c55e;
---danger:#ef4444;
---warn:#facc15;
---muted:#64748b;
+--bg:#020617;--panel:#0f172a;--card:#020617;--text:#e5e7eb;
+--accent:#22c55e;--danger:#ef4444;--warn:#facc15;--muted:#64748b;
 }
-
 .light{
---bg:#f1f5f9;
---panel:#ffffff;
---card:#e5e7eb;
---text:#020617;
+--bg:#f1f5f9;--panel:#ffffff;--card:#e5e7eb;--text:#020617;
 }
-
 *{box-sizing:border-box}
-
-body{
-margin:0;
-font-family:system-ui;
-background:var(--bg);
-color:var(--text);
-display:flex;
-justify-content:center;
-padding:15px;
-}
-
-.app{
-width:100%;
-max-width:1100px;
-display:grid;
-grid-template-columns:2fr 1fr;
-gap:15px;
-}
-
-.panel{
-background:var(--panel);
-border-radius:16px;
-padding:15px;
-overflow:auto;
-max-height:90vh;
-}
-
+body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text);display:flex;justify-content:center;padding:15px;}
+.app{width:100%;max-width:1100px;display:grid;grid-template-columns:2fr 1fr;gap:15px;}
+.panel{background:var(--panel);border-radius:16px;padding:15px;overflow:auto;max-height:90vh;}
 h1,h2,h3{margin:5px 0}
-
-button{
-border:none;
-border-radius:10px;
-padding:6px 10px;
-cursor:pointer;
-background:var(--accent);
-}
-
-button.alt{background:#334155;color:white}
-button.danger{background:var(--danger);color:white}
-
-input,select,textarea{
-width:100%;
-padding:8px;
-margin:4px 0;
-border-radius:10px;
-border:none;
-background:var(--bg);
-color:var(--text);
-}
-
+button{border:none;border-radius:10px;padding:6px 10px;cursor:pointer;background:var(--accent);}
+button.alt{background:#334155;color:white}button.danger{background:var(--danger);color:white}
+input,select,textarea{width:100%;padding:8px;margin:4px 0;border-radius:10px;border:none;background:var(--bg);color:var(--text);}
 small{color:var(--muted)}
-
 ul{list-style:none;padding:0;margin:0}
-
-.task{
-background:var(--bg);
-padding:8px;
-border-radius:10px;
-margin-bottom:6px;
-display:flex;
-align-items:center;
-gap:6px;
-cursor:grab;
-}
-
+.task{background:var(--bg);padding:8px;border-radius:10px;margin-bottom:6px;display:flex;align-items:center;gap:6px;cursor:grab;}
 .task.done span{text-decoration:line-through;opacity:.6}
 .task.high{border-left:4px solid var(--danger)}
 .task.medium{border-left:4px solid var(--warn)}
-
 .task span{flex:1}
-
-.calendar{
-display:grid;
-grid-template-columns:repeat(7,1fr);
-gap:4px;
-margin-top:10px;
-}
-
-.day{
-background:var(--bg);
-padding:6px;
-border-radius:8px;
-min-height:60px;
-font-size:12px;
-}
-
+.subtask{margin-left:20px;background:#111;padding:5px;border-radius:6px;display:flex;gap:5px;align-items:center;}
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:10px;}
+.day{background:var(--bg);padding:6px;border-radius:8px;min-height:60px;font-size:12px;}
 .today{outline:2px solid var(--accent)}
-
-.timer{
-font-size:32px;
-text-align:center;
-margin:10px 0;
-}
+.timer{font-size:32px;text-align:center;margin:10px 0;}
 </style>
 </head>
-
 <body>
 <div class="app">
 
 <!-- LEFT PANEL -->
 <div class="panel">
-<h1>🧠 LifeOS Definitivo</h1>
-
+<h1>🧠 LifeOS 2.0</h1>
 <input id="search" placeholder="Buscar tareas…">
-
 <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:5px">
 <input id="taskText" placeholder="Nueva tarea">
 <input type="date" id="taskDate">
-<select id="taskPriority">
-<option value="low">Baja</option>
-<option value="medium">Media</option>
-<option value="high">Alta</option>
-</select>
+<select id="taskPriority"><option value="low">Baja</option><option value="medium">Media</option><option value="high">Alta</option></select>
 </div>
-
 <button onclick="addTask()">Añadir tarea</button>
-
 <div>
 <button class="alt" onclick="setFilter('all')">Todas</button>
 <button class="alt" onclick="setFilter('todo')">Pendientes</button>
 <button class="alt" onclick="setFilter('done')">Hechas</button>
 <button class="alt" onclick="setFilter('today')">Hoy</button>
 </div>
-
 <ul id="taskList"></ul>
 </div>
 
 <!-- RIGHT PANEL -->
 <div class="panel">
-<h2>📊 Estadísticas</h2>
-<small id="stats"></small>
-
+<h2>📊 Estadísticas</h2><small id="stats"></small>
 <h2>⏱️ Pomodoro</h2>
 <div class="timer" id="timer">25:00</div>
-<button onclick="startPomodoro()">▶</button>
-<button class="alt" onclick="resetPomodoro()">⟳</button>
-
-<h2>📅 Calendario</h2>
-<div class="calendar" id="calendar"></div>
-
-<h2>📝 Notas</h2>
-<textarea id="notes" rows="6"></textarea>
-
+<button onclick="startPomodoro()">▶</button><button class="alt" onclick="resetPomodoro()">⟳</button>
+<audio id="pomSound" src="pomodoro.mp3"></audio>
+<h2>📅 Calendario</h2><div class="calendar" id="calendar"></div>
+<h2>📝 Notas</h2><textarea id="notes" rows="6"></textarea>
 <button class="alt" onclick="toggleTheme()">🌓 Tema</button>
 <button class="alt" onclick="exportData()">💾 Backup</button>
 <button class="danger" onclick="resetAll()">🗑 Reset</button>
 </div>
-
 </div>
 
 <script>
@@ -188,25 +86,22 @@ const taskList=document.getElementById("taskList");
 const notes=document.getElementById("notes");
 const stats=document.getElementById("stats");
 const calendar=document.getElementById("calendar");
+const pomSound=document.getElementById("pomSound");
 notes.value=localStorage.getItem("notes")||"";
-
 document.getElementById("search").oninput=render;
 notes.oninput=()=>localStorage.setItem("notes",notes.value);
 
 /* =================== TASKS =================== */
 function save(){localStorage.setItem("tasks",JSON.stringify(tasks))}
-
 function addTask(){
 if(!taskText.value.trim())return;
-tasks.push({id:Date.now(),text:taskText.value,date:taskDate.value,priority:taskPriority.value,done:false});
+tasks.push({id:Date.now(),text:taskText.value,date:taskDate.value,priority:taskPriority.value,done:false,subtasks:[]});
 taskText.value="";taskDate.value="";save();render();notify("Nueva tarea añadida");
 }
-
 function render(){
 taskList.innerHTML="";
 let q=document.getElementById("search").value.toLowerCase();
 const todayStr=new Date().toISOString().slice(0,10);
-
 let visible=tasks.filter(t=>{
 if(filter==="done"&&!t.done)return false;
 if(filter==="todo"&&t.done)return false;
@@ -214,33 +109,32 @@ if(filter==="today"&&t.date!==todayStr)return false;
 if(q&&!t.text.toLowerCase().includes(q))return false;
 return true;
 });
-
 visible.forEach(t=>{
 const li=document.createElement("li");
 li.className=`task ${t.done?"done":""} ${t.priority}`;
 li.draggable=true;
-
 const chk=document.createElement("input");
-chk.type="checkbox";
-chk.checked=t.done;
-chk.onchange=()=>{t.done=chk.checked;save();render()};
-
+chk.type="checkbox";chk.checked=t.done;chk.onchange=()=>{t.done=chk.checked;save();render()};
 const span=document.createElement("span");
 span.textContent=t.text+(t.date?" 📅"+t.date:"");
-span.onclick=()=>{
-const n=prompt("Editar tarea",t.text);
-if(n){t.text=n;save();render()}
-};
-
-const del=document.createElement("button");
-del.textContent="X";del.className="danger";
-del.onclick=()=>{tasks=tasks.filter(x=>x.id!==t.id);save();render()};
-
+span.onclick=()=>{const n=prompt("Editar tarea",t.text);if(n){t.text=n;save();render()}};
+const del=document.createElement("button");del.textContent="X";del.className="danger";del.onclick=()=>{tasks=tasks.filter(x=>x.id!==t.id);save();render();};
 li.append(chk,span,del);
+/* subtasks */
+t.subtasks.forEach(st=>{
+const sub=document.createElement("div");sub.className="subtask";
+const sc=document.createElement("input");sc.type="checkbox";sc.checked=st.done;
+sc.onchange=()=>{st.done=sc.checked;save();render();}
+const ss=document.createElement("span");ss.textContent=st.text;ss.onclick=()=>{const n=prompt("Editar subtask",st.text);if(n){st.text=n;save();render()}};
+sub.append(sc,ss);
+li.appendChild(sub);
+});
+const addSub=document.createElement("button");addSub.textContent="+";addSub.className="alt";
+addSub.onclick=()=>{const n=prompt("Nueva subtask");if(n){t.subtasks.push({text:n,done:false});save();render();}};
+li.appendChild(addSub);
 enableDrag(li,t);
 taskList.appendChild(li);
 });
-
 stats.textContent=`Total: ${tasks.length} | Pendientes: ${tasks.filter(t=>!t.done).length} | Hechas: ${tasks.filter(t=>t.done).length}`;
 renderCalendar();
 }
@@ -252,13 +146,7 @@ function setFilter(f){filter=f;render()}
 function enableDrag(li,t){
 li.ondragstart=e=>e.dataTransfer.setData("id",t.id);
 li.ondragover=e=>e.preventDefault();
-li.ondrop=e=>{
-e.preventDefault();
-const from=tasks.findIndex(x=>x.id==e.dataTransfer.getData("id"));
-const to=tasks.indexOf(t);
-tasks.splice(to,0,tasks.splice(from,1)[0]);
-save();render();
-};
+li.ondrop=e=>{e.preventDefault();const from=tasks.findIndex(x=>x.id==e.dataTransfer.getData("id"));const to=tasks.indexOf(t);tasks.splice(to,0,tasks.splice(from,1)[0]);save();render();};
 }
 
 /* =================== CALENDAR =================== */
@@ -268,11 +156,9 @@ const d=new Date();
 const y=d.getFullYear(),m=d.getMonth();
 const first=new Date(y,m,1).getDay();
 const days=new Date(y,m+1,0).getDate();
-
 for(let i=0;i<first;i++)calendar.innerHTML+="<div></div>";
 for(let i=1;i<=days;i++){
-const day=document.createElement("div");
-day.className="day";
+const day=document.createElement("div");day.className="day";
 if(i===d.getDate())day.classList.add("today");
 day.innerHTML="<strong>"+i+"</strong>";
 tasks.filter(t=>t.date===`${y}-${String(m+1).padStart(2,"0")}-${String(i).padStart(2,"0")}`)
@@ -282,23 +168,14 @@ calendar.appendChild(day);
 }
 
 /* =================== POMODORO =================== */
-function startPomodoro(){
-if(timerInterval)return;
-timerInterval=setInterval(()=>{
-pomodoro--;
-updateTimer();
-if(pomodoro<=0){clearInterval(timerInterval);timerInterval=null;alert("Pomodoro terminado 🍅");}
-},1000);
-}
-
+function startPomodoro(){if(timerInterval)return;timerInterval=setInterval(()=>{pomodoro--;updateTimer();if(pomodoro<=0){clearInterval(timerInterval);timerInterval=null;alert("Pomodoro terminado 🍅");pomSound.play();}},1000);}
 function resetPomodoro(){clearInterval(timerInterval);timerInterval=null;pomodoro=25*60;updateTimer();}
 function updateTimer(){const m=Math.floor(pomodoro/60),s=pomodoro%60;document.getElementById("timer").textContent=`${m}:${String(s).padStart(2,"0")}`}
 
 /* =================== SYSTEM =================== */
 function toggleTheme(){document.body.classList.toggle("light");localStorage.setItem("theme",document.body.classList.contains("light")?"light":"dark")}
 if(localStorage.getItem("theme")==="light")document.body.classList.add("light");
-
-function exportData(){const data={tasks,notes:notes.value};const blob=new Blob([JSON.stringify(data)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="lifeos_definitivo_backup.json";a.click();}
+function exportData(){const data={tasks,notes:notes.value};const blob=new Blob([JSON.stringify(data)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="lifeos_ultra_backup.json";a.click();}
 function resetAll(){if(confirm("¿Seguro?")){tasks=[];notes.value="";save();render();}}
 
 /* =================== NOTIFICATIONS =================== */
@@ -309,6 +186,10 @@ if("Notification"in window)Notification.requestPermission();
 document.addEventListener("keydown",e=>{if(e.key==="Enter"&&document.activeElement===taskText)addTask();})
 
 render();updateTimer();
+
+/* =================== PWA =================== */
+if('serviceWorker'in navigator){navigator.serviceWorker.register('sw.js').then(()=>console.log("SW registrado"));}
 </script>
 </body>
 </html>
+
