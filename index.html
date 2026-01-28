@@ -2,146 +2,306 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Mini gestor personal</title>
+<title>Gestor Personal Pro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
+:root {
+    --bg: #0f172a;
+    --card: #020617;
+    --text: #e5e7eb;
+    --accent: #22c55e;
+    --danger: #ef4444;
+}
+
+.light {
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --text: #020617;
+}
+
+* {
+    box-sizing: border-box;
+}
+
 body {
+    margin: 0;
     font-family: system-ui, sans-serif;
-    background: #0f172a;
-    color: #e5e7eb;
+    background: var(--bg);
+    color: var(--text);
     display: flex;
     justify-content: center;
-    padding: 40px;
+    padding: 20px;
 }
 
 .app {
-    background: #020617;
-    padding: 20px;
-    border-radius: 12px;
     width: 100%;
-    max-width: 500px;
+    max-width: 600px;
+    background: var(--card);
+    border-radius: 14px;
+    padding: 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 h1 {
-    text-align: center;
-    margin-bottom: 15px;
-}
-
-input, textarea, button {
-    width: 100%;
-    margin-bottom: 10px;
-    padding: 10px;
-    border-radius: 8px;
-    border: none;
-    font-size: 14px;
-}
-
-input, textarea {
-    background: #0f172a;
-    color: white;
+    font-size: 22px;
 }
 
 button {
-    background: #22c55e;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
     cursor: pointer;
+    background: var(--accent);
+    color: black;
 }
 
-button:hover {
-    background: #16a34a;
+button.secondary {
+    background: #334155;
+    color: white;
+}
+
+button.danger {
+    background: var(--danger);
+    color: white;
+}
+
+input, textarea {
+    width: 100%;
+    margin: 8px 0;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    background: var(--bg);
+    color: var(--text);
+}
+
+.filters {
+    display: flex;
+    gap: 6px;
+    margin: 10px 0;
 }
 
 ul {
     list-style: none;
     padding: 0;
+    margin: 0;
 }
 
 li {
-    background: #0f172a;
-    padding: 10px;
+    background: var(--bg);
     margin-bottom: 6px;
+    padding: 8px;
     border-radius: 8px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 8px;
+    cursor: grab;
+}
+
+li.done span {
+    text-decoration: line-through;
+    opacity: 0.6;
 }
 
 li span {
     flex: 1;
 }
 
-.delete {
-    background: #ef4444;
-    padding: 5px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    margin-left: 10px;
+small {
+    opacity: 0.7;
+}
+
+footer {
+    margin-top: 15px;
 }
 </style>
 </head>
 
 <body>
-
 <div class="app">
-    <h1>🧠 Gestor personal</h1>
+<header>
+    <h1>🧠 Gestor Personal</h1>
+    <button onclick="toggleTheme()">🌓</button>
+</header>
 
-    <input id="taskInput" placeholder="Nueva tarea...">
-    <button onclick="addTask()">Añadir tarea</button>
+<input id="taskInput" placeholder="Nueva tarea..." />
+<button onclick="addTask()">Añadir</button>
 
-    <ul id="taskList"></ul>
+<div class="filters">
+    <button class="secondary" onclick="setFilter('all')">Todas</button>
+    <button class="secondary" onclick="setFilter('todo')">Pendientes</button>
+    <button class="secondary" onclick="setFilter('done')">Hechas</button>
+</div>
 
-    <h3>📝 Notas</h3>
-    <textarea id="notes" rows="6" placeholder="Escribe lo que quieras..."></textarea>
+<small id="counter"></small>
+
+<ul id="taskList"></ul>
+
+<h3>📝 Notas</h3>
+<textarea id="notes" rows="5" placeholder="Notas rápidas..."></textarea>
+
+<footer>
+    <button class="secondary" onclick="exportData()">Exportar</button>
+    <button class="secondary" onclick="importData()">Importar</button>
+    <button class="danger" onclick="resetAll()">Reset</button>
+</footer>
 </div>
 
 <script>
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+let notes = localStorage.getItem("notes") || "";
+let filter = "all";
+
 const taskInput = document.getElementById("taskInput");
 const taskList = document.getElementById("taskList");
-const notes = document.getElementById("notes");
+const notesEl = document.getElementById("notes");
+const counter = document.getElementById("counter");
 
-// cargar datos
-let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-notes.value = localStorage.getItem("notes") || "";
+notesEl.value = notes;
 
-function saveTasks() {
+// ---------- Persistencia ----------
+function save() {
     localStorage.setItem("tasks", JSON.stringify(tasks));
+    localStorage.setItem("notes", notesEl.value);
 }
 
-function renderTasks() {
+// ---------- Render ----------
+function render() {
     taskList.innerHTML = "";
-    tasks.forEach((task, index) => {
+
+    let visible = tasks.filter(t =>
+        filter === "all" ||
+        (filter === "done" && t.done) ||
+        (filter === "todo" && !t.done)
+    );
+
+    visible.forEach((task, index) => {
         const li = document.createElement("li");
+        li.draggable = true;
+        li.className = task.done ? "done" : "";
+
+        const check = document.createElement("input");
+        check.type = "checkbox";
+        check.checked = task.done;
+        check.onchange = () => {
+            task.done = check.checked;
+            save(); render();
+        };
+
         const span = document.createElement("span");
-        span.textContent = task;
+        span.textContent = task.text;
+        span.onclick = () => editTask(task);
 
         const del = document.createElement("button");
         del.textContent = "X";
-        del.className = "delete";
+        del.className = "danger";
         del.onclick = () => {
-            tasks.splice(index, 1);
-            saveTasks();
-            renderTasks();
+            tasks.splice(tasks.indexOf(task), 1);
+            save(); render();
         };
 
-        li.appendChild(span);
-        li.appendChild(del);
+        li.append(check, span, del);
+        enableDrag(li, task);
         taskList.appendChild(li);
+    });
+
+    counter.textContent =
+        `Total: ${tasks.length} | Pendientes: ${tasks.filter(t => !t.done).length}`;
+}
+
+// ---------- Funciones ----------
+function addTask() {
+    if (!taskInput.value.trim()) return;
+    tasks.push({ text: taskInput.value, done: false });
+    taskInput.value = "";
+    save(); render();
+}
+
+function editTask(task) {
+    const text = prompt("Editar tarea", task.text);
+    if (text !== null) {
+        task.text = text;
+        save(); render();
+    }
+}
+
+function setFilter(f) {
+    filter = f;
+    render();
+}
+
+notesEl.addEventListener("input", save);
+
+// ---------- Tema ----------
+function toggleTheme() {
+    document.body.classList.toggle("light");
+    localStorage.setItem("theme",
+        document.body.classList.contains("light") ? "light" : "dark");
+}
+
+if (localStorage.getItem("theme") === "light") {
+    document.body.classList.add("light");
+}
+
+// ---------- Export / Import ----------
+function exportData() {
+    const data = JSON.stringify({ tasks, notes: notesEl.value });
+    const blob = new Blob([data], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "gestor_backup.json";
+    a.click();
+}
+
+function importData() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "application/json";
+    input.onchange = e => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = () => {
+            const data = JSON.parse(reader.result);
+            tasks = data.tasks || [];
+            notesEl.value = data.notes || "";
+            save(); render();
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}
+
+function resetAll() {
+    if (!confirm("¿Seguro?")) return;
+    tasks = [];
+    notesEl.value = "";
+    save(); render();
+}
+
+// ---------- Drag & Drop ----------
+function enableDrag(li, task) {
+    li.addEventListener("dragstart", e => {
+        e.dataTransfer.setData("text/plain", tasks.indexOf(task));
+    });
+
+    li.addEventListener("dragover", e => e.preventDefault());
+
+    li.addEventListener("drop", e => {
+        e.preventDefault();
+        const from = e.dataTransfer.getData("text/plain");
+        const to = tasks.indexOf(task);
+        tasks.splice(to, 0, tasks.splice(from, 1)[0]);
+        save(); render();
     });
 }
 
-function addTask() {
-    if (taskInput.value.trim() === "") return;
-    tasks.push(taskInput.value);
-    taskInput.value = "";
-    saveTasks();
-    renderTasks();
-}
-
-notes.addEventListener("input", () => {
-    localStorage.setItem("notes", notes.value);
-});
-
-renderTasks();
+render();
 </script>
-
 </body>
 </html>
